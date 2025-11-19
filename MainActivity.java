@@ -5,7 +5,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +21,9 @@ public class MainActivity extends AppCompatActivity {
     ImageView[] cubesViews;
     int[] cubesImages;
     ActivityMainBinding binding;
+    ArrayAdapter<Integer> adapter;
 
-    int[] wins;
+    ArrayList<Integer> wins;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -27,7 +31,11 @@ public class MainActivity extends AppCompatActivity {
         View view = binding.getRoot();
         setContentView(view);
         cubes = new int[5];
-        wins = new int[3];
+        wins = new ArrayList<Integer>();
+        binding.throwB.setOnClickListener(view1 -> Throw());
+        cubesViews=new ImageView[5];
+        cubesImages=new int[6];
+
         cubesViews[0] = binding.imageView2;
         cubesViews[1] = binding.imageView3;
         cubesViews[2] = binding.imageView4;
@@ -39,24 +47,32 @@ public class MainActivity extends AppCompatActivity {
         cubesImages[2] = R.drawable.k3;
         cubesImages[3] = R.drawable.k4;
         cubesImages[4] = R.drawable.k5;
+        cubesImages[5] = R.drawable.k6;
+        adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_list_item_1,wins);
+        binding.list.setAdapter(adapter);
     }
     public void rollAll()
     {
-        for (int i = 0; i < cubes.length; i++)
+        for (int i = 0; i < 5; i++)
         {
-            cubes[i] = new Random().nextInt(7);
+            cubes[i] = new Random().nextInt(6)+1;
             ChangeImage(i, cubes[i]);
         }
     }
     public void Throw()
     {
-        rollAll();
         ArrayList<Integer> liczby = new ArrayList<Integer>();
         ArrayList<Integer> wystopienia = new ArrayList<Integer>();
+        rollAll();
+
+        wins= new ArrayList<>();
+        //street
+
         for (int liczba : cubes) {
             if (liczby.contains(liczba))
             {
-                wystopienia.add(liczby.indexOf(liczba),wystopienia.get(liczby.indexOf(liczba)+1));
+                wystopienia.set(liczby.indexOf(liczba),wystopienia.get(liczby.indexOf(liczba))+1);
+
             }
             else
             {
@@ -64,15 +80,73 @@ public class MainActivity extends AppCompatActivity {
                 wystopienia.add(1);
             }
         }
-        for (int wystopienie : wystopienia)
-        {
-            if (wystopienie>1) {
-                wins[wystopienie-2] = (liczby.get(wystopienia.indexOf(wystopienie))*wystopienie);
+        for (int i = 0; i < wystopienia.size(); i++) {
+            if (wystopienia.get(i)>1) {
+                wins.add(liczby.get(i)*wystopienia.get(i));
             }
         }
+
+
+        boolean streetcheck=true;
+        if (liczby.size()==5)
+        {
+            for (int i = 0; i < 5; i++) {
+                if (liczby.contains(i+2))
+                {
+
+                }
+                else
+                {
+                    streetcheck=false;
+                    break;
+                }
+            }
+
+        }
+        else {streetcheck=false;}
+
+        if (streetcheck)
+        {
+            wins.add(60);
+
+            adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_list_item_1,wins);
+            binding.list.setAdapter(adapter);
+            return;
+        }
+        streetcheck=true;
+        if (liczby.size()==5)
+        {
+            for (int i = 0; i < 5; i++) {
+                if (liczby.contains(i+1))
+                {
+
+                }
+                else
+                {
+                    streetcheck=false;
+                    break;
+                }
+            }
+
+        }
+        else {streetcheck=false;}
+
+        if (streetcheck)
+        {
+            wins.add(60);
+
+            adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_list_item_1,wins);
+            binding.list.setAdapter(adapter);
+
+            return;
+        }
+        adapter = new ArrayAdapter<Integer>(this, android.R.layout.simple_list_item_1,wins);
+        adapter.notifyDataSetChanged();
+        binding.list.setAdapter(adapter);
     }
     private void ChangeImage(int i, int v)
     {
-        cubesViews[i].setImageResource(cubesImages[v]);
+        cubesViews[i].
+                setImageResource(cubesImages[v-1]);
     }
 }
